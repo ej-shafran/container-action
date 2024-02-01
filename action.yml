@@ -15,7 +15,8 @@ inputs:
     default: "password"
   DB_PORT:
     description: "Port to expose the MySQL server on"
-    required: true
+    required: false
+    default: 3306
 outputs:
   ERROR_MESSAGE:
     description: "Error message in case of an error"
