@@ -1,0 +1,60 @@
+name: "MySQL Container Action"
+description: "Starts and stops a MySQL container"
+inputs:
+  MYSQL_VERSION:
+    description: "MySQL version to use"
+    required: false
+    default: "latest"
+  MYSQL_DATABASE:
+    description: "Database name"
+    required: false
+    default: "My_CI_DB"
+  MYSQL_ROOT_PASSWORD:
+    description: "Database password"
+    required: false
+    default: "password"
+  DB_PORT:
+    description: "Port to expose the MySQL server on"
+    required: true
+outputs:
+  ERROR_MESSAGE:
+    description: "Error message in case of an error"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check Docker installation
+      id: check_docker
+      run: |
+        if ! command -v docker &> /dev/null
+        then
+          echo "Docker could not be found"
+          echo "::set-output name=ERROR_MESSAGE::Docker is not installed on this runner"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Start MySQL Container
+      id: start_container
+      run: |
+        CONTAINER_ID=$(docker run --rm -d -e MYSQL_ROOT_PASSWORD=${{ inputs.DB_PASSWORD }} -e MYSQL_DATABASE=${{ inputs.DB_NAME }} -p ${{ inputs.DB_PORT }}:3306 --name mysql_container mysql:${{ inputs.MYSQL_VERSION }})
+        if [[ -z "$CONTAINER_ID" ]]; then
+          echo "::set-output name=ERROR_MESSAGE::Failed to start MySQL container"
+          exit 1
+        fi
+        echo "MySQL container started with ID $CONTAINER_ID"
+        echo "::set-output name=CONTAINER_ID::$CONTAINER_ID"
+      shell: bash
+      env:
+        MYSQL_VERSION: ${{ inputs.MYSQL_VERSION }}
+        DB_NAME: ${{ inputs.DB_NAME }}
+        DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
+        DB_PORT: ${{ inputs.DB_PORT }}
+
+    - name: Cleanup
+      if: steps.start_container.outputs.CONTAINER_ID != ''
+      run: |
+        docker stop ${{ inputs.DB_NAME }}
+        echo "MySQL container stopped and removed"
+      run-on: cleanup
+      shell: bash
