@@ -18,8 +18,8 @@ inputs:
     required: false
     default: 3306
 outputs:
-  ERROR_MESSAGE:
-    description: "Error message in case of an error"
+  container_id:
+    description: "The docker container id"
 
 runs:
   using: "composite"
@@ -42,6 +42,8 @@ runs:
         if [[ -z "$CONTAINER_ID" ]]; then
           echo "::set-output name=ERROR_MESSAGE::Failed to start MySQL container"
           exit 1
+        else
+          echo "::set-output name=container_id::$CONTAINER_ID"
         fi
         echo "MySQL container started with ID $CONTAINER_ID"
       shell: bash
@@ -51,8 +53,8 @@ runs:
     - name: Cleanup
       uses: webiny/action-post-run@3.1.0
       id: post-run-command
-      if: ${{ !steps.start_container.outputs.ERROR_MESSAGE }}
+      if: ${{ !steps.start_container.outputs.container_id }}
       with:
         run: |
-          docker stop ${{ inputs.DB_NAME }}
+          docker stop ${{ steps.start_container.outputs.container_id }}
           echo "MySQL container stopped and removed"
