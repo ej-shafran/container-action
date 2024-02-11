@@ -38,24 +38,21 @@ runs:
     - name: Start MySQL Container
       id: start_container
       run: |
-        CONTAINER_ID=$(docker run --rm -d -e MYSQL_ROOT_PASSWORD=${{ inputs.DB_PASSWORD }} -e MYSQL_DATABASE=${{ inputs.DB_NAME }} -p ${{ inputs.DB_PORT }}:3306 --name mysql_container mysql:${{ inputs.MYSQL_VERSION }})
+        CONTAINER_ID=$(docker run --rm -e MYSQL_ROOT_PASSWORD=${{ inputs.MYSQL_ROOT_PASSWORD }} --name=${{ inputs.MYSQL_DATABASE }} -e MYSQL_DATABASE=${{ inputs.MYSQL_DATABASE }} -p ${{ inputs.DB_PORT }}:3306 -d mysql:${{ inputs.MYSQL_VERSION }})
         if [[ -z "$CONTAINER_ID" ]]; then
           echo "::set-output name=ERROR_MESSAGE::Failed to start MySQL container"
           exit 1
         fi
         echo "MySQL container started with ID $CONTAINER_ID"
-        echo "::set-output name=CONTAINER_ID::$CONTAINER_ID"
       shell: bash
       env:
-        MYSQL_VERSION: ${{ inputs.MYSQL_VERSION }}
-        DB_NAME: ${{ inputs.DB_NAME }}
-        DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
         DB_PORT: ${{ inputs.DB_PORT }}
 
     - name: Cleanup
-      if: steps.start_container.outputs.CONTAINER_ID != ''
-      run: |
-        docker stop ${{ inputs.DB_NAME }}
-        echo "MySQL container stopped and removed"
-      run-on: cleanup
-      shell: bash
+      uses: webiny/action-post-run@3.1.0
+      id: post-run-command
+      if: ${{ !steps.start_container.outputs.ERROR_MESSAGE }}
+      with:
+        run: |
+          docker stop ${{ inputs.DB_NAME }}
+          echo "MySQL container stopped and removed"
