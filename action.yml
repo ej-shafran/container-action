@@ -40,7 +40,7 @@ runs:
       run: |
         CONTAINER_ID=$(docker run --rm -e MYSQL_ROOT_PASSWORD=${{ inputs.MYSQL_ROOT_PASSWORD }} --name=${{ inputs.MYSQL_DATABASE }} -e MYSQL_DATABASE=${{ inputs.MYSQL_DATABASE }} -p ${{ inputs.DB_PORT }}:3306 -d mysql:${{ inputs.MYSQL_VERSION }})
         if [[ -z "$CONTAINER_ID" ]]; then
-          echo "::set-output name=ERROR_MESSAGE::Failed to start MySQL container"
+          echo "Failed to start MySQL container"
           exit 1
         else
           echo "::set-output name=container_id::$CONTAINER_ID"
@@ -53,7 +53,7 @@ runs:
     - name: Cleanup
       uses: webiny/action-post-run@3.1.0
       id: post-run-command
-      if: ${{ !steps.start_container.outputs.container_id }}
+      if: ${{ steps.start_container.outputs.container_id }}
       with:
         run: |
           docker stop ${{ steps.start_container.outputs.container_id }}
