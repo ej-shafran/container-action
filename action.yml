@@ -57,4 +57,3 @@ runs:
       with:
         run: |
           docker stop ${{ steps.start_container.outputs.container_id }}
-          echo "MySQL container stopped and removed"
