@@ -21,5 +21,6 @@ jobs:
           docker-options: "-e MYSQL_DATABASE=test -e MYSQL_ROOT_PASSWORD=testtest -p 3306:3306"
           image: "mysql:latest"
           name: "test"
-          MYSQL_DATABASE: "test"
-          MYSQL_ROOT_PASSWORD: "testtest"
+
+      - name: "Check that database exists"
+        run: "ps -ef | grep mysql"
