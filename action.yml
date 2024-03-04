@@ -1,59 +1,48 @@
-name: "MySQL Container Action"
-description: "Starts and stops a MySQL container"
+name: "Container Action"
+description: "Starts and stops a Docker container"
 inputs:
-  MYSQL_VERSION:
-    description: "MySQL version to use"
+  docker-options:
+    description: "Additional CLI options to pass to the `docker run` command"
     required: false
-    default: "latest"
-  MYSQL_DATABASE:
-    description: "Database name"
-    required: false
-    default: "My_CI_DB"
-  MYSQL_ROOT_PASSWORD:
-    description: "Database password"
-    required: false
-    default: "password"
-  DB_PORT:
-    description: "Port to expose the MySQL server on"
-    required: false
-    default: 3306
+    default: ""
+  image:
+    description: "The image to run"
+    required: true
+  name:
+    description: "The container's name"
+    required: true
 outputs:
-  container_id:
-    description: "The docker container id"
+  container-id:
+    description: "The container's ID"
 
 runs:
   using: "composite"
   steps:
-    - name: Check Docker installation
-      id: check_docker
+    - name: "Check Docker Installation"
+      id: "check-docker"
       run: |
-        if ! command -v docker &> /dev/null
-        then
-          echo "Docker could not be found"
-          echo "::set-output name=ERROR_MESSAGE::Docker is not installed on this runner"
+        if ! command -v docker &> /dev/null; then
+          echo "Could not find `docker` command"
+          echo "::set-output name=ERROR_MESSAGE::Could not find `docker` command"
           exit 1
         fi
-      shell: bash
 
-    - name: Start MySQL Container
-      id: start_container
+    - name: "Start Container"
+      id: "start-container"
       run: |
-        CONTAINER_ID=$(docker run --rm -e MYSQL_ROOT_PASSWORD=${{ inputs.MYSQL_ROOT_PASSWORD }} --name=${{ inputs.MYSQL_DATABASE }} -e MYSQL_DATABASE=${{ inputs.MYSQL_DATABASE }} -p ${{ inputs.DB_PORT }}:3306 -d mysql:${{ inputs.MYSQL_VERSION }})
-        if [[ -z "$CONTAINER_ID" ]]; then
-          echo "Failed to start MySQL container"
+        CONTAINER_ID="$(docker run ${{ inputs.docker-options }} --rm --name=${{ inputs.name }} -d ${{ inputs.image }})"
+        if [ -z "$CONTAINER_ID" ]; then
+          echo "Failed to start container"
           exit 1
         else
-          echo "::set-output name=container_id::$CONTAINER_ID"
+          echo "Container started with ID: $CONTAINER_ID"
+          echo "::set-output name=container-id::$CONTAINER_ID"
         fi
-        echo "MySQL container started with ID $CONTAINER_ID"
-      shell: bash
-      env:
-        DB_PORT: ${{ inputs.DB_PORT }}
 
-    - name: Cleanup
-      uses: webiny/action-post-run@3.1.0
-      id: post-run-command
-      if: ${{ steps.start_container.outputs.container_id }}
+    - name: "Cleanup"
+      uses: "webiny/action-post-run@3.1.0"
+      id: "post-run-command"
+      if: "${{ steps.start-container.outputs.container-id }}"
       with:
         run: |
-          docker stop ${{ steps.start_container.outputs.container_id }}
+          docker stop ${{ steps.start-container.outputs.container-id }}
