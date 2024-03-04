@@ -23,7 +23,6 @@ runs:
       run: |
         if ! command -v docker &> /dev/null; then
           echo "Could not find `docker` command"
-          echo "::set-output name=ERROR_MESSAGE::Could not find `docker` command"
           exit 1
         fi
       shell: "bash"
@@ -37,7 +36,7 @@ runs:
           exit 1
         else
           echo "Container started with ID: $CONTAINER_ID"
-          echo "::set-output name=container-id::$CONTAINER_ID"
+          echo "container-id=$CONTAINER_ID" >> $GITHUB_OUTPUT
         fi
       shell: "bash"
 
