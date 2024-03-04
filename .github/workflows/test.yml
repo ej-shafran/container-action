@@ -1,4 +1,4 @@
-name: CI
+name: "CI"
 
 on:
   push:
@@ -9,14 +9,17 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: "Checkout Code"
+        uses: "actions/checkout@v2"
 
-      - name: Test MySQL Container Action
-        uses: EyalPazz/mysql-container-action@v0.1.4
+      - name: "Test MySQL Container Action"
+        uses: "ej-shafran/container-action@v0.0.1"
         with:
+          docker-options: "-e MYSQL_DATABASE=test -e MYSQL_ROOT_PASSWORD=testtest -p 3306:3306"
+          image: "mysql:latest"
+          name: "test"
           MYSQL_DATABASE: "test"
           MYSQL_ROOT_PASSWORD: "testtest"
