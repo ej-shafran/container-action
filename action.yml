@@ -54,3 +54,4 @@ runs:
     - name: "Set Output"
       run: |
         echo "container-id=${{ steps.start-container.outputs.container-id }}" >> $GITHUB_OUTPUT
+      shell: "bash"
