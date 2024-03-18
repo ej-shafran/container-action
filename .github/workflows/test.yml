@@ -16,7 +16,7 @@ jobs:
         uses: "actions/checkout@v2"
 
       - name: "Test MySQL Container Action"
-        uses: "ej-shafran/container-action@v1.0.1"
+        uses: "ej-shafran/container-action@v1.0.2"
         id: "setup-container"
         with:
           docker-options: "-e MYSQL_DATABASE=test -e MYSQL_ROOT_PASSWORD=testtest -p 3306:3306"
