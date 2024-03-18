@@ -1,7 +1,8 @@
 name: "Container Action"
 description: "Starts and stops a Docker container"
-icon: "box"
-color: "blue"
+branding:
+  icon: "box"
+  color: "blue"
 inputs:
   docker-options:
     description: "Additional CLI options to pass to the `docker run` command"
