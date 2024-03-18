@@ -2,9 +2,9 @@ name: "CI"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -17,6 +17,7 @@ jobs:
 
       - name: "Test MySQL Container Action"
         uses: "ej-shafran/container-action@v0.0.2"
+        id: "setup-container"
         with:
           docker-options: "-e MYSQL_DATABASE=test -e MYSQL_ROOT_PASSWORD=testtest -p 3306:3306"
           image: "mysql:latest"
@@ -24,3 +25,6 @@ jobs:
 
       - name: "Check that database exists"
         run: "ps -ef | grep mysql"
+
+      - name: "Check the output"
+        run: "echo ${{ steps.setup-container.outputs.container-id }}"
