@@ -17,6 +17,7 @@ inputs:
 outputs:
   container-id:
     description: "The container's ID"
+    value: "${{ steps.start-container.outputs.container-id }}"
 
 runs:
   using: "composite"
@@ -50,8 +51,3 @@ runs:
       with:
         run: |
           docker stop ${{ steps.start-container.outputs.container-id }}
-
-    - name: "Set Output"
-      run: |
-        echo "container-id=${{ steps.start-container.outputs.container-id }}" >> $GITHUB_OUTPUT
-      shell: "bash"
